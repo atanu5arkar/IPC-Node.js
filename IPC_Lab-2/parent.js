@@ -1,6 +1,8 @@
 import { spawn } from "child_process";
 
+const nums = process.argv.slice(2);
 const spawns = {};
+let idx = 2;
 
 function spawnNode(argv) {
     const subprocess = spawn("node", ["child.js", argv]);
@@ -19,26 +21,20 @@ function spawnNode(argv) {
     });
 
     subprocess.on("close", (code) => {
+        spawnLimiter(nums, false);
         const out = spawns[pid].trim();
 
         if (!code) console.log(`Factorial of ${argv} is`, out);
         else console.error(out);
-        
-        return spawnLimiter(nums, false);
     });
 }
 
 function spawnLimiter(nums, firstTime = true) {
     if (!firstTime) {
-        if (nums[0]) spawnNode(nums[0]);
-        return nums.splice(0, 1);
+        if (nums[idx]) spawnNode(nums[idx++]);
+        return;
     }
-    for (let i = 0; i < 2; i++) {
-        if (!nums[i]) break;
-        spawnNode(nums[i]);
-    }
-    return nums.splice(0, 2);
+    for (const num of nums.slice(0, 2)) spawnNode(num);
 }
 
-const nums = process.argv.slice(2);
 spawnLimiter(nums);

@@ -13,19 +13,24 @@ function spawnNode(argv) {
     subprocess.stdout.on("data", (data) => {
         return spawns[pid] += `${data}`;
     });
+
     subprocess.stderr.on("data", (err) => {
         return spawns[pid] += `${err}`;
     });
+
     subprocess.on("error", (err) => {
         return console.log("Spawning Failed:\n", err);
     });
+    
+    subprocess.on("exit", () => {
+        return spawnLimiter(nums, false);
+    });
 
     subprocess.on("close", (code) => {
-        spawnLimiter(nums, false);
         const out = spawns[pid].trim();
 
-        if (!code) console.log(`Factorial of ${argv} is`, out);
-        else console.error(out);
+        if (!code) return console.log(`Factorial of ${argv} is`, out);
+        return console.error(out);
     });
 }
 
